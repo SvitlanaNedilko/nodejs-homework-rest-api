@@ -36,7 +36,7 @@ const validate = async (schema, obj, res, next) => {
     res.status(400).json({
       status: 'error',
       code: 400,
-      message: `Filed ${err.message.replace(/"/g, '')}`,
+      message: `Field ${err.message.replace(/"/g, '')}`,
     })
   }
 }
@@ -48,10 +48,6 @@ module.exports.validateContact = async (req, res, next) => {
 module.exports.validateStatusContact = async (req, res, next) => {
   return await validate(schemaFavoriteStatus, req.body, res, next)
 }
-
-// module.exports.validateUpdateContact = async (req, res, next) => {
-//   return await validate(schemaUpdate, req.body, res, next)
-// }
 
 module.exports.validateContactId = async (req, res, next) => {
   return await validate(schemaContactID, req.params, res, next)
