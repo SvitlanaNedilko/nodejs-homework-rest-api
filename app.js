@@ -12,12 +12,6 @@ app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json())
 
-// app.use((req, res, next) => {
-//   console.log('My middleware')
-//   console.log(new Date())
-//   return next()
-// })
-
 app.use('/api/contacts', contactsRouter)
 
 app.use((_req, res) => {
@@ -25,6 +19,11 @@ app.use((_req, res) => {
 })
 
 app.use((err, _req, res, _next) => {
+  if (err.name === 'ValidationError') {
+    return res
+      .status(400)
+      .json({ status: 'fail', code: 400, message: err.message })
+  }
   res.status(500).json({ status: 'fail', code: 500, message: err.message })
 })
 
