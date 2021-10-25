@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
 const Users = require('../repository/users')
 const { HttpCode } = require('../config/constants')
-const { findByEmail, create, updateToken } = require('../repository/users')
 require('dotenv').config()
+const { CustomError } = require('../helpers/custom_error')
 const SECRET_KEY = process.env.JVT_SECRET_KEY
 
 const registration = async (req, res, next) => {
@@ -36,12 +36,15 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body
   const user = await Users.findByEmail(email)
-  const isValidPassword = await user.isValidPassword(password)
+  let isValidPassword = false
+  if (user) {
+    isValidPassword = await user.isValidPassword(password.toString())
+  }
   if (!user || !isValidPassword) {
     return res.status(HttpCode.UNAUTHORIZED).json({
       status: 'error',
       code: HttpCode.UNAUTHORIZED,
-      message: 'Invalide Credentional',
+      message: 'Email or password is wrong',
     })
   }
   const id = user._id
@@ -51,14 +54,31 @@ const login = async (req, res, next) => {
   return res.status(HttpCode.OK).json({
     status: 'success',
     code: HttpCode.OK,
-    date: { token },
+    data: { token },
   })
-
-  res.json({})
 }
 
 const logout = async (req, res, next) => {
-  res.json()
+  const id = req.user._id
+  await Users.updateToken(id, null)
+  return res.status(HttpCode.NO_CONTENT).json({})
 }
 
-module.exports = { registration, login, logout }
+const updateSubscription = async (req, res, next) => {
+  const id = req.user._id
+  const user = await Users.updateSubscription(id, req.body)
+  if (user) {
+    return res
+      .status(200)
+      .json({ status: 'success', code: 200, data: { user } })
+  }
+  throw new CustomError(404, 'Not Found')
+}
+
+const getCurrent = async (req, res, next) => {
+  return res
+    .status(200)
+    .json({ status: 'success', code: 200, data: { user: req.user } })
+}
+
+module.exports = { registration, login, logout, updateSubscription, getCurrent }
