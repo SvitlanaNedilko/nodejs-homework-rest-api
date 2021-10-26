@@ -8,16 +8,8 @@ const schemaContact = Joi.object({
     tlds: true,
   }),
   phone: Joi.number().integer().positive().required(),
+  favorite: Joi.boolean().optional(),
 })
-
-const schemaUpdate = Joi.object({
-  name: Joi.string().alphanum().min(2).max(20),
-  email: Joi.string().email({
-    minDomainSegments: 2,
-    tlds: true,
-  }),
-  phone: Joi.number().integer().positive(),
-}).min(1)
 
 const schemaFavoriteStatus = Joi.object({
   favorite: Joi.boolean().required(),
@@ -32,7 +24,6 @@ const validate = async (schema, obj, res, next) => {
     const value = await schema.validateAsync(obj)
     next()
   } catch (err) {
-    console.log(err)
     res.status(400).json({
       status: 'error',
       code: 400,
