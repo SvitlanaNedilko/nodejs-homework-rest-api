@@ -1,4 +1,5 @@
 node_modules
 uploads
-users-avatarts
+public
 .env
+coverage

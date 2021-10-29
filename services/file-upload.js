@@ -20,10 +20,12 @@ class UploadFileAvatar {
       )
       .writeAsync(pathFile)
   }
-  async save(file, idUser) {
+  async save(file) {
     await this.#transformAvatar(file.path)
     await fs.rename(file.path, path.join(this.destination, file.filename))
-    return path.normalize(path.join(idUser, file.filename))
+    return path
+      .normalize(path.join('/avatars', file.filename))
+      .replace(/\\/g, '/')
   }
 }
 

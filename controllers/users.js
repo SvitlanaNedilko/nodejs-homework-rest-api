@@ -1,6 +1,4 @@
 const jwt = require('jsonwebtoken')
-const path = require('path')
-const mkdirp = require('mkdirp')
 const Users = require('../repository/users')
 const UploadService = require('../services/file-upload')
 const { HttpCode } = require('../config/constants')
@@ -43,7 +41,7 @@ const login = async (req, res, next) => {
   const user = await Users.findByEmail(email)
   let isValidPassword = false
   if (user) {
-    isValidPassword = await user.isValidPassword(password.toString())
+    isValidPassword = await user?.isValidPassword(password.toString())
   }
   if (!user || !isValidPassword) {
     return res.status(HttpCode.UNAUTHORIZED).json({
@@ -90,12 +88,10 @@ const uploadAvatar = async (req, res, next) => {
   const id = String(req.user._id)
 
   const file = req.file
-  const AVATAR_OF_USER = process.env.AVATAR_OF_USERS
-  const destination = path.join(AVATAR_OF_USER, id)
-  await mkdirp(destination)
+  const destination = process.env.AVATAR_OF_USERS
 
   const uploadService = new UploadService(destination)
-  const avatarUrl = await uploadService.save(file, id)
+  const avatarUrl = await uploadService.save(file)
   await Users.updateAvatar(id, avatarUrl)
 
   return res.status(HttpCode.OK).json({
